@@ -1,36 +1,38 @@
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.MouseInfo;
-import java.awt.Point;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.event.MouseInputListener;
 
-public class Canvas extends JPanel implements ActionListener, MouseListener {
-    Point mouseLoc = new Point();
-    Point prevMouseLoc = new Point();
-    Kinematics kinematics = new Kinematics();
-    Arm testArm = new Arm(400, 400, 50);
+public class Canvas extends JPanel implements ActionListener, MouseInputListener {
+    private Point mouseLoc = new Point();
+    private Kinematics kinematics = new Kinematics();
+    private Arm rootArm = new Arm(400, 400, 50);
 
-    Arm selectedArm;
+    private Arm selectedArm;
 
-    Timer gameTime = new Timer(1000 / 144, this);
+    private Timer gameTime = new Timer(1000 / 144, this);
 
     private boolean mousePressed = false;
 
     Canvas() {
+        // Some setup
         setBackground(Color.gray);
         setFocusable(true);
 
+        // Allow the canvas to look out for mouse presses and movement
         addMouseListener(this);
+        addMouseMotionListener(this);
 
-        // Only two for now
-        kinematics.AddArm(testArm);
-        kinematics.AddArm(50, 0);
-        kinematics.AddArm(50, 0);
+        // Create a kinematic chain
+        kinematics.AddArm(rootArm);
+        kinematics.AddArm(50, Math.PI / 4);
+        kinematics.AddArm(50, 2 * Math.PI / 4);
+        kinematics.AddArm(50, 3 * Math.PI / 4);
+        kinematics.AddArm(50, 4 * Math.PI / 4);
 
+        // Start game loop
         gameTime.start();
     }
 
@@ -49,23 +51,17 @@ public class Canvas extends JPanel implements ActionListener, MouseListener {
     // Main game loop
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Get mouse's location relative to the top left corner of the canvas
-        mouseLoc = MouseInfo.getPointerInfo().getLocation();
-        mouseLoc.translate(-this.getLocationOnScreen().x, -this.getLocationOnScreen().y);
 
-        // Grab a joint
-        // if (selectedArm != null) {
-        //     selectedArm.axis.x = (mouseLoc.getX() - selectedArm.start.x) / mouseLoc.distance(selectedArm.start.x, selectedArm.start.y);
-        //     selectedArm.axis.y = (mouseLoc.getY() - selectedArm.start.y) / mouseLoc.distance(selectedArm.start.x, selectedArm.start.y);
-        // }
-
-        if (mousePressed && mouseLoc != prevMouseLoc) {
-            kinematics.setTarget(mouseLoc.getX(), mouseLoc.getY());
+        // Grab a joint or perform inverse kinematics
+        if (selectedArm != null) {
+            // Calculate angle relative to joint
+            selectedArm.angle = Math.atan2(mouseLoc.getY() - selectedArm.start.y, mouseLoc.getX() - selectedArm.start.x);
+        } else if (mousePressed) {
+            // Set the target destination for inverse kinematics
+            kinematics.moveToTarget(mouseLoc.getX(), mouseLoc.getY());
         }
 
         kinematics.update();
-
-        prevMouseLoc = mouseLoc;
 
         repaint();
     }
@@ -79,10 +75,12 @@ public class Canvas extends JPanel implements ActionListener, MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
+        // Capture a continuos mouse press
         mousePressed = true;
 
+        // Grab which arm was selected at the time of press
         for (Arm selected : kinematics.arms) {
-            if (mouseLoc.distance(selected.end.x, selected.end.y) < 10) {
+            if (e.getPoint().distance(selected.end.x, selected.end.y) < 10) {
                 selectedArm = selected;
             }
         }
@@ -90,20 +88,23 @@ public class Canvas extends JPanel implements ActionListener, MouseListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // TODO Auto-generated method stub
+        // Reset continuous mouse press
         mousePressed = false;
         selectedArm = null;
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-        // TODO Auto-generated method stub
+    public void mouseEntered(MouseEvent e) { }
 
+    @Override
+    public void mouseExited(MouseEvent e) { }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        // We only use the mouse's location when the mouse is also pressed
+        mouseLoc = e.getPoint();
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
-        // TODO Auto-generated method stub
-
-    }
+    public void mouseMoved(MouseEvent e) { }
 }

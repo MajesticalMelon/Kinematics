@@ -1,20 +1,15 @@
 import java.util.ArrayList;
 
-import java.awt.Graphics2D;
-import java.text.BreakIterator;
+import java.awt.*;
 
 public class Kinematics {
     public ArrayList<Arm> arms;
 
-    private int currentIndex = 0;
-
     private Arm first = new Arm(0, 0, 0);
     private Arm last = new Arm(0, 0, 0);
 
-    private double endX = 0;
-    private double endY = 0;
-
-    private double maxLength = 0;
+    // Target points
+    private Joint target;
 
     public Kinematics() {
         this(new ArrayList<>());
@@ -23,103 +18,94 @@ public class Kinematics {
     public Kinematics(ArrayList<Arm> arms) {
         this.arms = arms;
 
+        // Only grab variables if the list has items
         if (this.arms.size() > 0) {
-
-            endX = (last.end.x - first.start.x);
-            endY = (last.end.y - first.start.y);
-
             last = this.arms.get(this.arms.size() - 1);
             first = this.arms.get(0);
+
+            target = new Joint(last.end.x, last.end.y);
         }
     }
 
     public void update() {
         for (int i = 0; i < this.arms.size(); i++) {
-            // if (i != this.arms.size() - 1) {
-            //     this.arms.get(i).end = this.arms.get(i + 1).start;
-            // }
-
+            // Make sure the arms stay together
             if (i != 0) {
                 this.arms.get(i).start = this.arms.get(i - 1).end;
             }
 
+            // Recalcualte endpoints based on any angle changes
             this.arms.get(i).update();
         }
     }
 
+    // Renders all arms of this kinematic object to the screen
     public void draw(Graphics2D g2) {
-        for (Arm arm : this.arms) {
-            arm.draw(g2);
+        for (int i = 0; i < this.arms.size(); i++) {
+            // Changes stroke weight based on position in array
+            g2.setStroke(new BasicStroke((this.arms.size() - i) * 2));
+            this.arms.get(i).draw(g2);
         }
     }
 
+    // Add an arm to this kinematic object
     public void AddArm(Arm arm) {
+        // Perform some different assignments for the first arm
         if (this.arms.size() == 0) {
             this.arms.add(arm);
             first = arm;
             last = arm;
-            endX = last.end.x;
-            endY = last.end.y;
+            
+            target = new Joint(last.end.x, last.end.y);
         } else {
-            this.AddArm(arm.length, arm.start.angle);
+            this.AddArm(arm.length, arm.angle);
         }
     }
 
+    // Mostly used for arms added after the first
     public void AddArm(double length, double angle) {
         Arm arm = new Arm(last.end.x, last.end.y, length, angle);
 
         this.arms.add(arm);
         last = arm;
-        endX = last.end.x;
-        endY = last.end.y;
-
-        currentIndex = this.arms.size() - 1;
+        
+        target = new Joint(last.end.x, last.end.y);
     }
 
-    public void forward() {
-        // Perform forward kinematics
-        for (int i = this.arms.size() - 1; i > 0; i--) {
-            Arm current = this.arms.get(i);
-            Arm prev = this.arms.get(i - 1);
-
-            double cos = Math.cos(current.start.angle);
-            double sin = Math.sin(current.start.angle);
-
-            double xnew = prev.axis.x * cos - prev.axis.y * sin;
-            double ynew = prev.axis.x * sin + prev.axis.y * cos;
-
-            prev.axis.x = xnew;
-            prev.axis.y = ynew;
-        }
-    }
-
+    // Recursively performs inverse kinematics
     public void inverse(int index) {
+        // Break out if there are no more arms left
         if (index < 0) {
             return;
         }
 
-        // Perform inverse kinematics
+        // Grab the passed in arm
         Arm current = this.arms.get(index);
 
-        double startToEndX = endX - current.start.x;
-        double startToEndY = endY - current.start.y;
+        // Line from the start joint of current arm to the target point
+        double startToEndX = target.x - current.start.x;
+        double startToEndY = target.y - current.start.y;
 
+        // Line from the start joint of current arm to the end of the kinematic
         double startToLastX = last.end.x - current.start.x;
         double startToLastY = last.end.y - current.start.y;
 
+        // Angle between the two aforementioned lines
         double angleBetween = Math.atan2(startToEndY, startToEndX) - Math.atan2(startToLastY, startToLastX);
-        double currentAngle = Math.atan2(current.axis.y, current.axis.x);
 
-        current.axis.x = Math.cos(angleBetween + currentAngle);
-        current.axis.y = Math.sin(angleBetween + currentAngle);
+        // Adjust the current arm's angle
+        current.angle += angleBetween;
 
+        // Recurse with the arm before the current
         inverse(index - 1);
     }
 
-    public void setTarget(double x, double y) {
-        endX = x;
-        endY = y;
+    // Moves the kinematic chain towards (x, y)
+    public void moveToTarget(double x, double y) {
+        target.x = x;
+        target.y = y;
 
+        // Inverse kinematics
         inverse(this.arms.size() - 1);
     }
 }

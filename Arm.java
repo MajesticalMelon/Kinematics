@@ -4,7 +4,7 @@ public class Arm {
     public Joint start;
     public Joint end;
 
-    public Joint axis;
+    public double angle;
 
     public double length;
 
@@ -13,29 +13,28 @@ public class Arm {
     }
 
     public Arm(double x, double y, double length, double angle) {
-        start = new Joint(x, y, angle);
-        end = new Joint(length, 0, 0);
+        this.start = new Joint(x, y);
+        this.end = new Joint(length, 0);
         this.length = length;
-        axis = new Joint(1, 0, 0);
+        this.angle = angle;
         calculateEndPoints();
     }
 
+    // Draw a line with a point on either end
     public void draw(Graphics2D g2) {
         g2.fillRect((int)this.start.x - 2, (int)this.start.y - 2, 4, 4);
         g2.fillRect((int)this.end.x - 2, (int)this.end.y - 2, 4, 4);
         g2.drawLine((int)this.start.x, (int)this.start.y, (int)this.end.x, (int)this.end.y);
     }
 
+    // Recalculates endpoints
     public void update() { 
         calculateEndPoints();
     }
 
+    // Calculate end points based on angle
     private void calculateEndPoints() {
-        // Create a point directly to the right (0 rotation) of the origin
-        this.end.x = this.start.x + axis.x * this.length;
-        this.end.y = this.start.y + axis.y * this.length;
-
-        this.axis.x = (this.end.x - this.start.x) / this.length;
-        this.axis.y = (this.end.y - this.start.y) / this.length;
+        this.end.x = this.start.x + this.length * Math.cos(this.angle);
+        this.end.y = this.start.y + this.length * Math.sin(this.angle);
     }
 }

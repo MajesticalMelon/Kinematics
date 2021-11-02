@@ -3,7 +3,7 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 
 public class Run extends JFrame {
-
+    // Window size
     public static int Width = 800;
     public static int Height = 800;
 
