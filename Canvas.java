@@ -14,8 +14,6 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
 
     private Timer gameTime = new Timer(1000 / 144, this);
 
-    private boolean mousePressed = false;
-
     Canvas() {
         // Some setup
         setBackground(Color.gray);
