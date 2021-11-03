@@ -27,10 +27,10 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
 
         // Create a kinematic chain
         kinematics.AddArm(rootArm);
-        kinematics.AddArm(50, Math.PI / 4);
-        kinematics.AddArm(50, 2 * Math.PI / 4);
-        kinematics.AddArm(50, 3 * Math.PI / 4);
-        kinematics.AddArm(50, 4 * Math.PI / 4);
+        kinematics.AddArm(50, 0);
+        kinematics.AddArm(50, 0);
+        kinematics.AddArm(50, 0);
+        kinematics.AddArm(50, 0);
 
         // Start game loop
         gameTime.start();
@@ -55,10 +55,9 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
         // Grab a joint or perform inverse kinematics
         if (selectedArm != null) {
             // Calculate angle relative to joint
-            selectedArm.angle = Math.atan2(mouseLoc.getY() - selectedArm.start.y, mouseLoc.getX() - selectedArm.start.x);
+            selectedArm.angle = Math.atan2(mouseLoc.getY() - selectedArm.start.y,
+                    mouseLoc.getX() - selectedArm.start.x);
         } else if (mousePressed) {
-            // Set the target destination for inverse kinematics
-            kinematics.moveToTarget(mouseLoc.getX(), mouseLoc.getY());
         }
 
         kinematics.update();
@@ -94,10 +93,12 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) { }
+    public void mouseEntered(MouseEvent e) {
+    }
 
     @Override
-    public void mouseExited(MouseEvent e) { }
+    public void mouseExited(MouseEvent e) {
+    }
 
     @Override
     public void mouseDragged(MouseEvent e) {
@@ -106,5 +107,9 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) { }
+    public void mouseMoved(MouseEvent e) {
+        for (int i = 0; i < 5; i++) {
+            kinematics.moveToTarget(e.getX(), e.getY());
+        }
+    }
 }

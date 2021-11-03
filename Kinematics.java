@@ -27,15 +27,13 @@ public class Kinematics {
         }
     }
 
+    // Updates all arms
     public void update() {
         for (int i = 0; i < this.arms.size(); i++) {
             // Make sure the arms stay together
             if (i != 0) {
                 this.arms.get(i).start = this.arms.get(i - 1).end;
             }
-
-            // Recalcualte endpoints based on any angle changes
-            this.arms.get(i).update();
         }
     }
 
@@ -43,7 +41,7 @@ public class Kinematics {
     public void draw(Graphics2D g2) {
         for (int i = 0; i < this.arms.size(); i++) {
             // Changes stroke weight based on position in array
-            g2.setStroke(new BasicStroke((this.arms.size() - i) * 2));
+            g2.setStroke(new BasicStroke((this.arms.size() - i) * 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             this.arms.get(i).draw(g2);
         }
     }
@@ -55,7 +53,7 @@ public class Kinematics {
             this.arms.add(arm);
             first = arm;
             last = arm;
-            
+
             target = new Joint(last.end.x, last.end.y);
         } else {
             this.AddArm(arm.length, arm.angle);
@@ -65,22 +63,28 @@ public class Kinematics {
     // Mostly used for arms added after the first
     public void AddArm(double length, double angle) {
         Arm arm = new Arm(last.end.x, last.end.y, length, angle);
+        arm.child = last;
 
         this.arms.add(arm);
         last = arm;
-        
+
         target = new Joint(last.end.x, last.end.y);
     }
 
     // Recursively performs inverse kinematics
-    public void inverse(int index) {
+    public void inverse(Arm current) {
         // Break out if there are no more arms left
-        if (index < 0) {
+        if (current == null) {
             return;
         }
 
-        // Grab the passed in arm
-        Arm current = this.arms.get(index);
+        // Do the most deeply nested arm first
+        inverse(current.child);
+
+        //Recalculate the endpoints for every arm
+        for (int i = 0; i < this.arms.size(); i++) {
+            this.arms.get(i).update();
+        }
 
         // Line from the start joint of current arm to the target point
         double startToEndX = target.x - current.start.x;
@@ -95,9 +99,6 @@ public class Kinematics {
 
         // Adjust the current arm's angle
         current.angle += angleBetween;
-
-        // Recurse with the arm before the current
-        inverse(index - 1);
     }
 
     // Moves the kinematic chain towards (x, y)
@@ -105,7 +106,7 @@ public class Kinematics {
         target.x = x;
         target.y = y;
 
-        // Inverse kinematics
-        inverse(this.arms.size() - 1);
+        // Start with the last arm
+        inverse(last);
     }
 }
