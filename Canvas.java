@@ -45,19 +45,24 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
     }
 
     private void draw(Graphics2D g2) {
+        g2.setColor(Color.black);
         kinematics.draw(g2);
+
+        g2.setColor(Color.orange);
+        if (selectedArm != null) {
+            selectedArm.draw(g2);
+        }
     }
 
     // Main game loop
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        // Grab a joint or perform inverse kinematics
+        // Grab a joint or perform forward kinematics
         if (selectedArm != null) {
             // Calculate angle relative to joint
             selectedArm.angle = Math.atan2(mouseLoc.getY() - selectedArm.start.y,
-                    mouseLoc.getX() - selectedArm.start.x);
-        } else if (mousePressed) {
+                    mouseLoc.getX() - selectedArm.start.x) - (selectedArm.child != null ? selectedArm.child.worldAngle : 0);
         }
 
         kinematics.update();
@@ -74,8 +79,7 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // Capture a continuos mouse press
-        mousePressed = true;
+        mouseLoc = e.getPoint();
 
         // Grab which arm was selected at the time of press
         for (Arm selected : kinematics.arms) {
@@ -87,8 +91,7 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // Reset continuous mouse press
-        mousePressed = false;
+        // Reset selectedArm
         selectedArm = null;
     }
 
@@ -104,12 +107,15 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
     public void mouseDragged(MouseEvent e) {
         // We only use the mouse's location when the mouse is also pressed
         mouseLoc = e.getPoint();
+
+        if (selectedArm == null) {
+            for (int i = 0; i < 5; i++) {
+                kinematics.moveToTarget(e.getX(), e.getY());
+            }
+        }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        for (int i = 0; i < 5; i++) {
-            kinematics.moveToTarget(e.getX(), e.getY());
-        }
     }
 }

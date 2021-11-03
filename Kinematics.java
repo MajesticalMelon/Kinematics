@@ -34,6 +34,8 @@ public class Kinematics {
             if (i != 0) {
                 this.arms.get(i).start = this.arms.get(i - 1).end;
             }
+
+            this.arms.get(i).update();
         }
     }
 
@@ -70,7 +72,7 @@ public class Kinematics {
 
         target = new Joint(last.end.x, last.end.y);
     }
-
+    
     // Recursively performs inverse kinematics
     public void inverse(Arm current) {
         // Break out if there are no more arms left

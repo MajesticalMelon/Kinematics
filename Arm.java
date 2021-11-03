@@ -7,6 +7,8 @@ public class Arm {
     public double angle;
     public double length;
 
+    public double worldAngle;
+
     public Arm child = null;
 
     public Arm(double x, double y, double length) {
@@ -33,13 +35,13 @@ public class Arm {
 
     // Calculate end points based on angle
     private void calculateEndPoints() {
-        double angleSum = 0;
+        worldAngle = this.angle;
 
-        for (Arm current = this; current != null; current = current.child) {
-            angleSum += current.angle;
+        for (Arm current = this.child; current != null; current = current.child) {
+            worldAngle += current.angle;
         }
 
-        this.end.x = this.start.x + this.length * Math.cos(angleSum);
-        this.end.y = this.start.y + this.length * Math.sin(angleSum);
+        this.end.x = this.start.x + this.length * Math.cos(worldAngle);
+        this.end.y = this.start.y + this.length * Math.sin(worldAngle);
     }
 }
