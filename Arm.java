@@ -30,6 +30,8 @@ public class Arm {
 
     // Recalculates endpoints
     public void update() {
+        // Constrain angle
+        this.angle = Math.max(Math.min(this.angle, Math.PI / 2), -Math.PI / 2);
         calculateEndPoints();
     }
 

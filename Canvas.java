@@ -63,6 +63,7 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
                     mouseLoc.getX() - selectedArm.start.x) - (selectedArm.child != null ? selectedArm.child.worldAngle : 0);
         }
 
+        // Update kinematic chain
         kinematics.update();
 
         repaint();
