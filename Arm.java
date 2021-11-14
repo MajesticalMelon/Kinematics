@@ -28,7 +28,7 @@ public class Arm {
         g2.drawLine((int) this.start.x, (int) this.start.y, (int) this.end.x, (int) this.end.y);
     }
 
-    // Recalculates endpoints
+    // Recalculates endpoints ye
     public void update() {
         // Constrain angle
         this.angle = Math.max(Math.min(this.angle, Math.PI / 2), -Math.PI / 2);
