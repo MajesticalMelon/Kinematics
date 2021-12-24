@@ -28,21 +28,25 @@ public class Arm {
         g2.drawLine((int) this.start.x, (int) this.start.y, (int) this.end.x, (int) this.end.y);
     }
 
-    // Recalculates endpoints ye
+    // Recalculates endpoints and constrains the arms rotation
     public void update() {
-        // Constrain angle
-        this.angle = Math.max(Math.min(this.angle, Math.PI / 2), -Math.PI / 2);
         calculateEndPoints();
     }
 
     // Calculate end points based on angle
     private void calculateEndPoints() {
+        // Start the world angle calculation
+        this.angle = Math.max(Math.min(this.angle, Math.PI / 4), -Math.PI / 4);
         worldAngle = this.angle;
 
+        // Move toward the root, and add onto the world angle
         for (Arm current = this.child; current != null; current = current.child) {
             worldAngle += current.angle;
         }
 
+        // Constrain world angle
+
+        // Use world angle to perfom arm rotation
         this.end.x = this.start.x + this.length * Math.cos(worldAngle);
         this.end.y = this.start.y + this.length * Math.sin(worldAngle);
     }
