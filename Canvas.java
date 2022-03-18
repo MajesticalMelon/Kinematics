@@ -30,7 +30,7 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
         kinematics.AddArm(50, 0);
         kinematics.AddArm(50, 0);
         kinematics.AddArm(50, 0);
-        kinematics.arms.get(kinematics.arms.size() - 1).fixed = true;
+        //kinematics.arms.get(kinematics.arms.size() - 3).fixed = true;
 
         // Start game loop
         gameTime.start();
