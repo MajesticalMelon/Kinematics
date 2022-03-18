@@ -13,6 +13,7 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
     private Arm selectedArm;
 
     private Timer gameTime = new Timer(1000 / 144, this);
+    public static float deltaTime = 0f;
 
     Canvas() {
         // Some setup
@@ -29,6 +30,7 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
         kinematics.AddArm(50, 0);
         kinematics.AddArm(50, 0);
         kinematics.AddArm(50, 0);
+        kinematics.arms.get(kinematics.arms.size() - 1).fixed = true;
 
         // Start game loop
         gameTime.start();
@@ -55,7 +57,7 @@ public class Canvas extends JPanel implements ActionListener, MouseInputListener
     // Main game loop
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        deltaTime = gameTime.getDelay();
         // Grab a joint or perform forward kinematics
         if (selectedArm != null) {
             // Calculate angle relative to joint

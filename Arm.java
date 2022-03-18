@@ -1,6 +1,7 @@
 import java.awt.Graphics2D;
 
 public class Arm {
+    public static double GRAVITY = 0.01;
     public Joint start;
     public Joint end;
 
@@ -11,6 +12,10 @@ public class Arm {
 
     public Arm child = null;
 
+    public boolean fixed;
+
+    public Joint velocity;
+
     public Arm(double x, double y, double length) {
         this(x, y, length, 0f);
     }
@@ -20,6 +25,8 @@ public class Arm {
         this.end = new Joint(length, 0);
         this.length = length;
         this.angle = angle;
+        this.velocity = new Joint(0, 0);
+        this.fixed = false;
         calculateEndPoints();
     }
 
@@ -36,7 +43,7 @@ public class Arm {
     // Calculate end points based on angle
     private void calculateEndPoints() {
         // Start the world angle calculation
-        this.angle = Math.max(Math.min(this.angle, Math.PI / 4), -Math.PI / 4);
+        // this.angle = Math.max(Math.min(this.angle, Math.PI / 4), -Math.PI / 4);
         worldAngle = this.angle;
 
         // Move toward the root, and add onto the world angle
@@ -44,10 +51,10 @@ public class Arm {
             worldAngle += current.angle;
         }
 
-        // Constrain world angle
-
         // Use world angle to perfom arm rotation
-        this.end.x = this.start.x + this.length * Math.cos(worldAngle);
-        this.end.y = this.start.y + this.length * Math.sin(worldAngle);
+        if (!this.fixed) {
+            this.end.x = this.start.x + this.length * Math.cos(worldAngle);
+            this.end.y = this.start.y + this.length * Math.sin(worldAngle);
+        }
     }
 }
